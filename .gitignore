@@ -1,0 +1,22 @@
+# 运行期数据（含登录凭据、电量账本）—— 绝不入库
+data/
+
+# 构建产物与中间文件（重新打包会自动生成，不入库）
+dist_py/
+build_py/.venv/
+build_py/_work/
+build_py/_version_info.txt
+
+# Python 缓存
+__pycache__/
+*.pyc
+*.pyo
+
+# 系统/编辑器
+Thumbs.db
+.DS_Store
+.idea/
+.vscode/
+
+# WorkBuddy 内部目录（非项目源码）
+.workbuddy/

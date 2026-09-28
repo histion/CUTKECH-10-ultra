@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>酷态科10号Ultra</title>
+<style>
+:root{
+  --bg:#070b14; --panel:rgba(19,27,46,.74); --panel2:rgba(15,22,38,.86);
+  --line:rgba(122,162,255,.14); --line2:rgba(122,162,255,.28);
+  --txt:#e9eefb; --txt-2:#93a3c4; --txt-3:#5d6d90;
+  --acc:#38bdf8; --acc2:#818cf8; --acc3:#c084fc;
+  --ok:#34d399; --warn:#fbbf24; --bad:#f87171;
+  --c1:#818cf8; --c2:#c084fc; --c3:#34d399; --a:#fbbf24;
+}
+*{box-sizing:border-box}
+/* 自适应核心：根字号随窗口宽度线性变化（1100px 时约 13.4px，1920px 时约 15.8px，
+   2560px 时封顶 18px）。下面所有尺寸都用 rem，于是整块界面（字号/间距/圆角/控件）
+   会跟着窗口一起放大缩小；窄窗口另有媒体查询负责重排成单列。 */
+html{font-size:clamp(13.4px, calc(0.33vw + 9.5px), 18px)}
+html,body{height:100%}
+body{
+  margin:0; background:var(--bg); color:var(--txt);
+  font:1rem/1.5 "Segoe UI","Microsoft YaHei UI","PingFang SC",system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased; overflow-x:hidden;
+  font-variant-numeric:tabular-nums;
+}
+body::before{
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background:
+    radial-gradient(64vw 37vw at 12% -6%, rgba(56,189,248,.13), transparent 62%),
+    radial-gradient(54vw 33vw at 88% 4%, rgba(192,132,252,.11), transparent 60%),
+    radial-gradient(50vw 30vw at 50% 108%, rgba(129,140,248,.09), transparent 60%);
+}
+.app{position:relative; z-index:1; max-width:min(100%,132rem); margin:0 auto;
+  padding:1.14rem 1.43rem 2.14rem}
+
+/* ---------- header ---------- */
+header{display:flex; align-items:center; gap:1.14rem; flex-wrap:wrap; margin-bottom:1.14rem}
+.brand{display:flex; align-items:center; gap:0.79rem}
+.brand .mark{width:2.71rem;height:2.71rem;flex:0 0 2.71rem;border-radius:0.79rem;background:linear-gradient(145deg,#0d1526,#17263f);
+  display:grid;place-items:center;border:1px solid var(--line2);box-shadow:0 6px 18px rgba(0,0,0,.45)}
+.brand .mark svg{width:1.71rem;height:1.71rem}
+.brand h1{font-size:1.21rem;margin:0;font-weight:650;letter-spacing:.2px}
+.brand .sub{font-size:0.86rem;color:var(--txt-3);margin-top:1px}
+.spacer{flex:1}
+.pill{display:inline-flex;align-items:center;gap:0.5rem;padding:0.43rem 0.86rem;border-radius:999px;
+  background:rgba(255,255,255,.04);border:1px solid var(--line);font-size:0.89rem;color:var(--txt-2);white-space:nowrap}
+.pill b{color:var(--txt);font-weight:600}
+.dot{width:0.57rem;height:0.57rem;border-radius:50%;background:var(--txt-3);flex:0 0 0.57rem}
+.dot.on{background:var(--ok);box-shadow:0 0 0 4px rgba(52,211,153,.16);animation:pulse 2.4s infinite}
+.dot.warn{background:var(--warn);box-shadow:0 0 0 4px rgba(251,191,36,.16)}
+.dot.err{background:var(--bad);box-shadow:0 0 0 4px rgba(248,113,113,.16)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+button{font:inherit;cursor:pointer;border-radius:0.71rem;padding:0.57rem 1.07rem;transition:.16s;
+  background:rgba(255,255,255,.05);border:1px solid var(--line2);color:var(--txt)}
+button:hover{background:rgba(56,189,248,.13);border-color:rgba(56,189,248,.5)}
+button:active{transform:translateY(1px)}
+button.primary{background:linear-gradient(135deg,rgba(56,189,248,.22),rgba(129,140,248,.22));border-color:rgba(56,189,248,.5)}
+button.ghost{background:transparent}
+button:disabled{opacity:.45;cursor:not-allowed}
+
+/* ---------- cards ---------- */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:1.14rem;padding:1.07rem 1.21rem;
+  backdrop-filter:blur(18px);box-shadow:0 10px 34px rgba(0,0,0,.3)}
+.card h2{margin:0 0 0.79rem;font-size:0.93rem;font-weight:600;color:var(--txt-2);letter-spacing:.5px;
+  display:flex;align-items:center;justify-content:space-between;gap:0.71rem}
+.card h2 .tag{font-size:0.79rem;color:var(--txt-3);font-weight:400}
+.grid{display:grid;gap:1rem}
+.row1{grid-template-columns:24rem minmax(0,1fr)}
+.row3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.row2{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr)}
+@media(max-width:1180px){.row1{grid-template-columns:1fr}.row3{grid-template-columns:1fr}.row2{grid-template-columns:1fr}}
+/* 中等窗口：三列压成两列，别直接掉到单列 */
+@media(min-width:821px) and (max-width:1180px){.row3{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.ports{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1rem;margin:1rem 0}
+@media(max-width:1080px){.ports{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.ports{grid-template-columns:1fr}}
+
+/* ---------- gauge ---------- */
+.gauge-wrap{position:relative;display:grid;place-items:center}
+.gauge-wrap svg{width:100%;max-width:20.71rem;height:auto;display:block}
+.gauge-center{position:absolute;inset:0;display:grid;place-content:center;text-align:center;pointer-events:none}
+.gauge-val{font-size:3.29rem;font-weight:700;line-height:1;letter-spacing:-1.5px;
+  background:linear-gradient(135deg,#7dd3fc,#c084fc);-webkit-background-clip:text;background-clip:text;color:transparent}
+.gauge-unit{font-size:1.07rem;color:var(--txt-2);margin-left:3px;font-weight:500}
+.gauge-cap{font-size:0.82rem;color:var(--txt-3);margin-top:5px;letter-spacing:.6px}
+.gauge-foot{display:flex;justify-content:space-between;gap:0.57rem;margin-top:0.86rem;font-size:0.86rem;color:var(--txt-3)}
+.gauge-foot b{color:var(--txt);font-weight:600}
+
+/* ---------- chart ---------- */
+.chart-box{position:relative;height:17.86rem}
+#chart{width:100%;height:100%;display:block}
+.legend{display:flex;gap:1rem;flex-wrap:wrap;font-size:0.86rem;color:var(--txt-2);margin-bottom:0.57rem}
+.legend span{display:inline-flex;align-items:center;gap:0.43rem;cursor:pointer;user-select:none}
+.legend i{width:1rem;height:3px;border-radius:2px;display:inline-block}
+.legend span.off{opacity:.35}
+.tip{position:absolute;pointer-events:none;background:rgba(9,14,26,.95);border:1px solid var(--line2);
+  border-radius:0.64rem;padding:0.57rem 0.71rem;font-size:0.86rem;line-height:1.65;white-space:nowrap;opacity:0;transition:opacity .12s;z-index:5;
+  box-shadow:0 8px 24px rgba(0,0,0,.5)}
+.tip b{font-weight:600}
+
+/* ---------- port cards ---------- */
+.port{background:var(--panel);border:1px solid var(--line);border-radius:1.14rem;padding:1rem 1.07rem;
+  backdrop-filter:blur(18px);position:relative;overflow:hidden;transition:.2s}
+.port.active{border-color:var(--line2);box-shadow:0 12px 34px rgba(0,0,0,.35)}
+.port::after{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--pc,#334155);opacity:.85}
+.port .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.64rem}
+.port .name{font-size:1.07rem;font-weight:650;letter-spacing:.4px}
+.port .st{font-size:0.79rem;padding:0.21rem 0.64rem;border-radius:999px;background:rgba(255,255,255,.05);color:var(--txt-3);border:1px solid var(--line)}
+.port .st.on{color:#0b1220;background:var(--ok);border-color:transparent;font-weight:600}
+.port .big{font-size:2.14rem;font-weight:700;line-height:1;letter-spacing:-1px;color:var(--pc,#e9eefb)}
+.port .big small{font-size:0.93rem;color:var(--txt-2);font-weight:500;margin-left:2px}
+.port .sub{font-size:0.86rem;color:var(--txt-2);margin-top:0.5rem;display:flex;justify-content:space-between}
+.port .sub span{color:var(--txt-3)}
+.bar{height:0.29rem;border-radius:3px;background:rgba(255,255,255,.07);margin-top:0.79rem;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:3px;background:var(--pc);transition:width .4s}
+.port .cap{margin-top:0.71rem;font-size:0.82rem;color:var(--txt-3);border-top:1px solid var(--line);padding-top:0.64rem;
+  display:flex;justify-content:space-between;gap:0.43rem}
+.port .cap b{color:var(--txt-2);font-weight:600}
+
+/* ---------- kv lists ---------- */
+.kv{display:grid;grid-template-columns:auto 1fr;gap:0.43rem 1rem;font-size:0.89rem}
+.kv dt{color:var(--txt-3);white-space:nowrap}
+.kv dd{margin:0;color:var(--txt);text-align:right;overflow:hidden;text-overflow:ellipsis}
+.kv dd.mute{color:var(--txt-3)}
+.chips{display:flex;gap:0.43rem;flex-wrap:wrap}
+.chip{font-size:0.79rem;padding:0.21rem 0.64rem;border-radius:0.5rem;border:1px solid var(--line);color:var(--txt-3)}
+.chip.on{color:var(--ok);border-color:rgba(52,211,153,.42);background:rgba(52,211,153,.1)}
+.chip.off{opacity:.5}
+
+/* ---------- table / log ---------- */
+table{width:100%;border-collapse:collapse;font-size:0.86rem}
+th,td{text-align:left;padding:0.43rem 0.64rem;border-bottom:1px solid var(--line)}
+th{color:var(--txt-3);font-weight:500;font-size:0.79rem;letter-spacing:.4px}
+td.mono{font-family:"Cascadia Mono",Consolas,"Courier New",monospace;color:var(--txt-2)}
+.log{height:12.29rem;overflow:auto;font:0.82rem/1.7 "Cascadia Mono",Consolas,monospace;color:var(--txt-2);
+  background:rgba(4,8,16,.5);border:1px solid var(--line);border-radius:0.71rem;padding:0.64rem 0.79rem;white-space:pre-wrap;word-break:break-all}
+.log::-webkit-scrollbar,.scroll::-webkit-scrollbar{width:9px;height:9px}
+.log::-webkit-scrollbar-thumb,.scroll::-webkit-scrollbar-thumb{background:rgba(122,162,255,.22);border-radius:5px}
+
+/* ---------- notice / layer ---------- */
+.notice{display:flex;gap:0.79rem;align-items:flex-start;padding:0.86rem 1rem;border-radius:0.86rem;font-size:0.93rem;
+  border:1px solid var(--line);background:rgba(255,255,255,.03);margin-bottom:1rem}
+.notice.warn{border-color:rgba(251,191,36,.34);background:rgba(251,191,36,.07)}
+.notice.bad{border-color:rgba(248,113,113,.34);background:rgba(248,113,113,.07)}
+.notice .ico{font-size:1.14rem;line-height:1.2}
+.notice .t{font-weight:600;margin-bottom:3px}
+.notice .d{color:var(--txt-2);font-size:0.89rem}
+.notice code{background:rgba(255,255,255,.07);padding:1px 6px;border-radius:5px;font-size:0.86rem}
+.layer{position:fixed;inset:0;z-index:40;display:grid;place-items:center;background:rgba(4,7,14,.82);backdrop-filter:blur(7px)}
+.layer.hidden{display:none}
+.modal{width:min(40rem,92vw);background:var(--panel2);border:1px solid var(--line2);border-radius:1.29rem;padding:1.57rem;
+  box-shadow:0 24px 70px rgba(0,0,0,.65)}
+.modal h3{margin:0 0 0.57rem;font-size:1.14rem}
+.modal p{margin:0 0 1rem;color:var(--txt-2);font-size:0.93rem}
+.qrbox{display:grid;place-items:center;background:#fff;border-radius:1rem;padding:0.86rem;margin:0 auto 1rem;width:16.86rem;height:16.86rem}
+.qrbox img{width:15.14rem;height:15.14rem;display:block;image-rendering:pixelated}
+.qrbox .ph{color:#64748b;font-size:0.89rem;text-align:center;padding:1.43rem}
+.hidden{display:none!important}
+.muted{color:var(--txt-3)}
+.flexrow{display:flex;gap:0.71rem;flex-wrap:wrap;align-items:center}
+input[type=number],input[type=text]{font:inherit;background:rgba(255,255,255,.05);border:1px solid var(--line);
+  border-radius:0.64rem;color:var(--txt);padding:0.43rem 0.71rem;width:7.86rem}
+select{font:inherit;background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:0.64rem;
+  color:var(--txt);padding:0.36rem 0.57rem;max-width:10.71rem}
+select option{background:#131b2e;color:#e9eefb}
+
+/* ---------- 控制面板 ---------- */
+.ctl-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0.71rem 1.14rem}
+@media(max-width:700px){.ctl-grid{grid-template-columns:1fr}}
+.sw-row{display:flex;align-items:center;justify-content:space-between;gap:0.71rem;font-size:0.93rem;color:var(--txt-2)}
+.sw-row b{color:var(--txt);font-weight:600}
+.switch{position:relative;width:2.86rem;height:1.57rem;flex:0 0 2.86rem;border-radius:999px;cursor:pointer;
+  background:rgba(255,255,255,.09);border:1px solid var(--line2);transition:.18s}
+.switch::after{content:'';position:absolute;top:0.14rem;left:0.14rem;width:1.14rem;height:1.14rem;border-radius:50%;
+  background:#8a9ab8;transition:.18s}
+.switch.on{background:rgba(52,211,153,.28);border-color:rgba(52,211,153,.55)}
+.switch.on::after{left:calc(100% - 1.14rem - 0.14rem);background:var(--ok)}
+.switch.busy{opacity:.5;pointer-events:none}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:0.64rem;overflow:hidden}
+.seg button{border:0;border-radius:0;padding:0.36rem 0.79rem;font-size:0.86rem;background:transparent;
+  border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button.on{background:rgba(56,189,248,.2);color:#e2f4ff}
+details{border-radius:0}
+summary{list-style:none;user-select:none}
+summary::-webkit-details-marker{display:none}
+summary::before{content:'▸ ';color:var(--txt-3)}
+details[open] summary::before{content:'▾ '}
+.pcard .top{display:flex;align-items:center;justify-content:space-between}
+
+/* ---------- 用电量 ---------- */
+.stat-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0.79rem;margin-bottom:1.07rem}
+@media(max-width:760px){.stat-row{grid-template-columns:1fr}}
+.stat{background:rgba(255,255,255,.032);border:1px solid var(--line);border-radius:0.86rem;padding:0.79rem 0.93rem}
+.stat .k{font-size:0.82rem;color:var(--txt-3);margin-bottom:0.36rem}
+.stat .v{font-size:1.57rem;font-weight:700;letter-spacing:-.5px;line-height:1.15}
+.stat .v small{font-size:0.86rem;color:var(--txt-2);font-weight:500;margin-left:2px}
+.stat.hi .v{background:linear-gradient(135deg,#7dd3fc,#c084fc);-webkit-background-clip:text;
+  background-clip:text;color:transparent}
+.ebars{display:flex;gap:0.57rem;align-items:flex-end;height:9rem;padding-top:4px}
+.ebars .col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;
+  gap:0.43rem;height:100%}
+.ebars .barwrap{width:100%;flex:1;display:flex;align-items:flex-end;justify-content:center}
+.ebars .b{width:64%;min-height:2px;border-radius:5px 5px 2px 2px;
+  background:linear-gradient(180deg,#38bdf8,#4f46e5);transition:height .45s}
+.ebars .col.today .b{background:linear-gradient(180deg,#c084fc,#6366f1)}
+.ebars .col.zero .b{background:rgba(255,255,255,.09)}
+.ebars .lbl{font-size:0.75rem;color:var(--txt-3);white-space:nowrap}
+.ebars .val{font-size:0.75rem;color:var(--txt-2)}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <div class="brand">
+      <div class="mark">
+        <svg width="24" height="24" viewBox="0 0 240 240">
+          <defs><linearGradient id="hg" x1="0" y1="1" x2="1" y2="0">
+            <stop offset="0" stop-color="#38bdf8"/><stop offset=".5" stop-color="#818cf8"/><stop offset="1" stop-color="#c084fc"/>
+          </linearGradient></defs>
+          <path d="M58 182 A88 88 0 1 1 182 182" fill="none" stroke="url(#hg)" stroke-width="26" stroke-linecap="round"/>
+          <path d="M132 62 L92 130 h21 l-11 48 44 -68 h-22 l16 -48 z" fill="#eaf6ff"/>
+        </svg>
+      </div>
+      <div>
+        <span style="display:inline-flex;align-items:center;gap:0.5rem">
+          <h1>酷态科10号Ultra</h1>
+          <a href="https://www.coolapk.com/u/36716810" target="_blank" rel="noopener" title="原作者：酷安 &amp; 双水d（点击访问酷安主页）" style="font-size:0.86rem;font-weight:400;color:var(--txt-3);text-decoration:none;white-space:nowrap">原作者:酷安&amp;双水d</a>
+        </span>
+        <div class="sub" id="dev-sub">AD1204U · 正在初始化…</div>
+      </div>
+    </div>
+    <div class="spacer"></div>
+    <button class="ghost" id="btn-auto-a" style="display:inline-flex;align-items:center;gap:0.5rem" title="USB-A 自动化：C 口有负载时自动开启 A 口与小电流模式，C 口空闲时自动关闭"><span class="dot" id="auto-a-dot"></span>A口自动</button>
+    <div class="pill" id="link-pill"><span class="dot" id="link-dot"></span><span id="link-txt">连接中</span></div>
+    <div class="pill" id="rssi-pill" title="蓝牙信号强度">信号 <b id="rssi">—</b></div>
+    <button class="ghost" id="btn-login">登录小米云</button>
+    <button id="btn-reconnect">重连</button>
+    <button class="ghost" id="btn-quit">退出</button>
+  </header>
+
+  <div id="notices"></div>
+
+  <div class="grid row1">
+    <div class="card">
+      <h2>当前总功率<span class="tag" id="gauge-tag">四口合计</span></h2>
+      <div class="gauge-wrap">
+        <svg viewBox="0 0 240 240">
+          <defs>
+            <linearGradient id="gg" x1="0" y1="1" x2="1" y2="0">
+              <stop offset="0" stop-color="#38bdf8"/><stop offset=".55" stop-color="#818cf8"/><stop offset="1" stop-color="#c084fc"/>
+            </linearGradient>
+          </defs>
+          <path d="M57.8 182.2 A88 88 0 1 1 182.2 182.2" fill="none" stroke="rgba(122,162,255,.13)"
+                stroke-width="17" stroke-linecap="round"/>
+          <path id="gauge-fg" d="M57.8 182.2 A88 88 0 1 1 182.2 182.2" fill="none" stroke="url(#gg)"
+                stroke-width="17" stroke-linecap="round" stroke-dasharray="414.7" stroke-dashoffset="414.7"
+                style="transition:stroke-dashoffset .45s cubic-bezier(.4,0,.2,1)"/>
+        </svg>
+        <div class="gauge-center">
+          <div><span class="gauge-val" id="gauge-val">0.0</span><span class="gauge-unit">W</span></div>
+          <div class="gauge-cap">当前总功率 · 满量程 <span id="gauge-max">120</span>W</div>
+        </div>
+      </div>
+      <div class="gauge-foot">
+        <div>窗口峰值 <b id="peak">0.0 W</b></div>
+        <div>在充电 <b id="active-n">0</b> 口</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>实时功率曲线<span class="tag" id="win-tag">最近 5 分钟</span></h2>
+      <div class="legend" id="legend"></div>
+      <div class="chart-box">
+        <canvas id="chart"></canvas>
+        <div class="tip" id="tip"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ports" id="ports"></div>
+
+  <div class="grid row2" style="margin-bottom:1rem">
+    <div class="card">
+      <h2>控制充电头<span class="tag" id="ctl-tag">写入需要蓝牙已连接</span></h2>
+
+      <div style="font-size:0.82rem;color:var(--txt-3);margin-bottom:0.57rem">端口开关</div>
+      <div class="ctl-grid" id="ctl-ports"></div>
+      <div class="flexrow" style="margin-top:0.64rem">
+        <button class="ghost" id="btn-all-on">全部开启</button>
+        <button class="ghost" id="btn-all-off">全部关闭</button>
+      </div>
+
+      <div style="border-top:1px solid var(--line);margin-top:0.93rem;padding-top:0.86rem">
+        <div style="font-size:0.82rem;color:var(--txt-3);margin-bottom:0.64rem">
+          协议开关<span class="muted"> · 逐口启用/关闭快充协议</span>
+        </div>
+        <div class="ctl-grid" id="ctl-proto"></div>
+        <div class="flexrow" style="margin-top:0.64rem">
+          <button class="ghost" id="btn-proto-on">全部开启</button>
+          <button class="ghost" id="btn-proto-off">全部关闭</button>
+        </div>
+      </div>
+
+      <div style="border-top:1px solid var(--line);margin-top:0.93rem;padding-top:0.86rem">
+        <div style="font-size:0.82rem;color:var(--txt-3);margin-bottom:0.64rem">设备设置</div>
+        <div class="ctl-grid">
+          <label class="sw-row">场景模式<select id="sel-scene"></select></label>
+          <label class="sw-row">息屏时间<select id="sel-screen"></select></label>
+          <label class="sw-row">屏幕语言<select id="sel-lang"></select></label>
+          <div class="sw-row">USB-A 小电流<div class="switch" id="sw-usba" data-piid="15"></div></div>
+          <div class="sw-row">空闲自动熄屏<div class="switch" id="sw-idle" data-piid="19"></div></div>
+          <div class="sw-row">锁定屏幕方向<div class="switch" id="sw-dir" data-piid="20"></div></div>
+        </div>
+        <div class="flexrow" style="margin-top:0.86rem">
+          <button id="btn-defaults">恢复常用默认</button>
+        </div>
+      </div>
+
+      <details style="border-top:1px solid var(--line);margin-top:0.93rem;padding-top:0.79rem">
+        <summary style="cursor:pointer;font-size:0.86rem;color:var(--txt-2)">高级 · 原始属性 / 扩展读取</summary>
+
+        <div class="ctl-grid" style="margin-top:0.79rem">
+          <label class="sw-row">协议控制字 2.7<input type="text" id="in-pc" placeholder="0x00" style="width:5.86rem"></label>
+          <label class="sw-row">端口关闭设置 2.8<input type="text" id="in-p8" placeholder="0x00" style="width:5.86rem"></label>
+          <label class="sw-row">协议开关掩码 2.21<input type="text" id="in-pce" placeholder="0x00000000" style="width:7.86rem"></label>
+        </div>
+        <div class="flexrow" style="margin-top:0.64rem">
+          <button class="ghost" id="btn-adv">写入上面三项</button>
+          <button class="ghost" id="btn-ext">读取扩展属性 2.8</button>
+        </div>
+
+        <div class="muted" style="font-size:0.82rem;margin-top:0.64rem;line-height:1.7" id="ext-out">
+          2.7 / 2.8 的语义没查清，只在明确知道要写什么时手动填原始数值；2.21 就是上面的协议开关面板
+          （位定义已逐位实测，留这个输入框只是为了整块复原）。<br>
+          <b>本机固件没有「定时关闭」</b>：官方规格表把它记在 2.9–2.12（u16，0–1440 分钟），
+          但实测这四个属性不存在 —— 请求会被设备静默丢弃，米家 App 里也没有对应开关。<br>
+          「读取扩展属性」会用一次「把 2.7 换成 2.8」的 15 项替换形状去问 2.8 ——
+          这台设备只认<b>正好 15 项</b>的请求，所以常态轮询里塞不进它。
+        </div>
+        <div id="ext-res" style="font-size:0.82rem;margin-top:0.57rem;line-height:1.7"></div>
+
+        <div class="flexrow" style="margin-top:0.79rem">
+          <button class="ghost" id="btn-sweep">扫描隐藏属性 / 温度</button>
+          <button class="ghost" id="btn-reset" style="border-color:var(--bad);color:var(--bad)">恢复出厂设置</button>
+        </div>
+        <div class="muted" style="font-size:0.82rem;margin-top:0.64rem;line-height:1.7" id="sweep-out">
+          扫描会先做一次通道自检（用完整属性表验证链路是通的），再把 siid=2 的未知属性
+          各问一遍，并列出 GATT 全表、侦听厂商 notify。会暂停采集器约半分钟。<br>
+          「恢复出厂设置」调用设备自带的 MIOT action #1，会覆盖端口开关、场景、息屏、协议开关等
+          全部设置，需要二次确认。
+        </div>
+      </details>
+    </div>
+
+    <div class="card">
+      <h2>用电量统计<span class="tag" id="energy-tag">本机积分</span></h2>
+      <div class="stat-row">
+        <div class="stat hi"><div class="k">今日用电</div><div class="v"><span id="e-today">0.00</span><small>Wh</small></div></div>
+        <div class="stat"><div class="k">累计用电</div><div class="v"><span id="e-total">0.00</span><small>Wh</small></div></div>
+        <div class="stat"><div class="k">本次会话</div><div class="v"><span id="e-sess">—</span><small>Wh</small></div></div>
+      </div>
+      <div class="ebars" id="ebars"></div>
+      <div class="muted" style="font-size:0.82rem;margin-top:0.79rem;line-height:1.7">
+        充电头本身没有"累计电量"属性可读，只能对瞬时功率做时间积分（米家 App 同样是积分思路，区别是本机结果会落盘、重启不丢）。
+        两次采样间隔超过 60 秒的那一段会被整段丢弃 —— 宁可少算，也不瞎算。
+      </div>
+      <div style="border-top:1px solid var(--line);margin-top:0.86rem;padding-top:0.71rem">
+        <div style="font-size:0.82rem;color:var(--txt-3);margin-bottom:0.5rem">每口累计分解</div>
+        <dl class="kv" id="e-ports"></dl>
+      </div>
+      <div style="border-top:1px solid var(--line);margin-top:0.86rem;padding-top:0.71rem">
+        <div style="font-size:0.82rem;color:var(--txt-3);margin-bottom:0.5rem">最近充电会话</div>
+        <dl class="kv" id="e-sessions"></dl>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid row3">
+    <div class="card">
+      <h2>协议协商</h2>
+      <dl class="kv" id="neg"></dl>
+      <div style="margin-top:0.86rem;border-top:1px solid var(--line);padding-top:0.79rem">
+        <div style="font-size:0.82rem;color:var(--txt-3);margin-bottom:0.5rem">采集设置</div>
+        <div class="flexrow">
+          <label class="muted" style="font-size:0.86rem">采样间隔
+            <input type="number" id="in-interval" min="0.5" max="10" step="0.5"> 秒
+          </label>
+          <button id="btn-cfg">应用</button>
+        </div>
+        <div class="flexrow" style="margin-top:0.64rem;gap:1.14rem">
+          <label class="sw-row">任务栏功率图标
+            <input type="checkbox" id="in-tray" style="width:auto;accent-color:#38bdf8">
+          </label>
+          <label class="sw-row">托盘显示
+            <select id="in-traymode" style="width:auto;padding:0.14rem 0.29rem">
+              <option value="total">仅总功率</option>
+              <option value="all">全部功率（图标轮流）</option>
+              <option value="panel">一行面板（四口+总）</option>
+            </select>
+          </label>
+          <button class="ghost" id="btn-shortcut">创建桌面快捷方式</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>设备设置</h2>
+      <dl class="kv" id="settings"></dl>
+    </div>
+    <div class="card">
+      <h2>采集器日志<span class="tag" id="log-tag"></span></h2>
+      <div class="log" id="log"></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:1rem">
+    <h2>原始属性<span class="tag">siid=2 全部字段（值不经过任何换算）</span></h2>
+    <div class="scroll" style="max-height:290px;overflow:auto">
+      <table id="raw"><thead><tr><th>属性</th><th>类型</th><th>值</th><th>原始字节</th><th>状态</th></tr></thead><tbody></tbody></table>
+    </div>
+  </div>
+</div>
+
+<div class="layer hidden" id="login-layer">
+  <div class="modal">
+    <h3>登录小米云</h3>
+    <p>用手机上的<b>米家 App</b> 扫描下面的二维码并确认授权。只需一次，之后本应用会把 12 字节的 BLE 密钥保存在本地
+      <code>data\cuktech.token</code>，不会再联网。</p>
+    <div class="qrbox" id="qrbox"><div class="ph">尚未生成二维码</div></div>
+    <div id="login-msg" class="muted" style="font-size:0.89rem;margin-bottom:1rem;min-height:1.29rem"></div>
+    <div class="flexrow" style="justify-content:flex-end">
+      <button class="ghost" id="btn-login-close">关闭</button>
+      <button class="primary" id="btn-login-start">生成二维码</button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const $ = (s) => document.querySelector(s);
+const PORT_COLOR = { c1:'var(--c1)', c2:'var(--c2)', c3:'var(--c3)', a:'var(--a)' };
+const PORT_HEX   = { c1:'#818cf8', c2:'#c084fc', c3:'#34d399', a:'#fbbf24' };
+const TOTAL_HEX  = '#38bdf8';
+const PROTO_CN = { idle:'空闲', pd:'PD', pd_fixed:'PD 固定档', pd_pps:'PD PPS', usb_a:'USB-A', usb_a_qc:'USB-A QC' };
+const KIND_CN  = { pd_fixed:'固定档', pd_pps:'PPS' };
+
+let WINDOW_SEC = 300;
+let hidden = {};                 // 图例开关
+let last = null;                 // /api/state 的负载
+let rows = [];                   // 历史
+let peak = 0;
+const wrap = { sp: null, w: 0, h: 0 };
+
+const fmtW = (v) => (v == null ? '—' : (Math.round(v * 10) / 10).toFixed(1));
+
+// ------------------------------------------------------------------ 轮询
+async function api(path, opts) {
+  const r = await fetch(path, opts);
+  return r.json();
+}
+
+async function tick() {
+  try {
+    const [st, hi] = await Promise.all([
+      api('/api/state'),
+      api('/api/history?seconds=' + WINDOW_SEC),
+    ]);
+    last = st;
+    rows = (hi && hi.rows) || [];
+    render();
+  } catch (e) {
+    setLink('error', '与本地服务失联：' + e.message);
+  }
+}
+
+// ------------------------------------------------------------------ 渲染
+function setLink(state, msg) {
+  const dot = $('#link-dot'), txt = $('#link-txt');
+  dot.className = 'dot';
+  const map = {
+    connected: ['on', '已连接'], scanning: ['warn', '搜索中'], connecting: ['warn', '连接中'],
+    auth: ['warn', '认证中'], reconnecting: ['warn', '重连中'], error: ['err', '出错'],
+    'need-login': ['warn', '待登录'], idle: ['', '未启动'],
+  };
+  const m = map[state] || ['', state];
+  if (m[0]) dot.classList.add(m[0]);
+  // 已连接时不重复副标题，否则会出现「已连接 · 已连接并认证」
+  txt.textContent = (state === 'connected' || !msg) ? m[1] : (m[1] + ' · ' + msg);
+}
+
+// 量程随读数抬升，且只升不降（避免弧线在 120W 以上溢出表盘）
+function gaugeMaxFor(v) {
+  for (const s of [120, 150, 200, 250, 300]) if (v <= s) return s;
+  return Math.ceil(v / 50) * 50;
+}
+
+function renderNotices() {
+  const box = $('#notices');
+  const out = [];
+  if (!last) return;
+  if (!last.env.pythonFound) {
+    out.push(['bad', '✖', '找不到 Python 运行环境',
+      '采集器需要 Python。请在应用目录执行 <code>tools\\setup-env.ps1</code> 建立运行环境后重试。']);
+  } else if (!last.env.tokenPresent) {
+    out.push(['warn', '⚠', '尚未登录小米云',
+      '读取充电器需要一个 BLE 密钥。点右上角「登录小米云」扫码授权一次即可。']);
+  } else {
+    const s = last.link.state;
+    if (s === 'reconnecting' || s === 'error') {
+      out.push(['warn', '⚠', '蓝牙链路未就绪', (last.link.msg || '') +
+        '<br>常见原因：充电器未通电；米家 App 占用了这条蓝牙连接（蓝牙同时只允许一个中心端）；离得太远。']);
+    } else if (s === 'scanning') {
+      out.push(['', '⏳', '正在搜索充电器', '请确认充电头已插上市电，并且米家 App 已断开它。']);
+    } else if (!last.latest) {
+      out.push(['', '⏳', '等待第一帧数据', (last.link.msg || '')]);
+    }
+  }
+  box.innerHTML = out.map(([cls, ico, t, d]) =>
+    `<div class="notice ${cls}"><div class="ico">${ico}</div><div><div class="t">${t}</div><div class="d">${d}</div></div></div>`
+  ).join('');
+}
+
+function renderGauge(ports, total) {
+  const MAX = gaugeMaxFor(Math.max(total, peak));
+  const frac = Math.max(0, Math.min(1, total / MAX));
+  $('#gauge-fg').setAttribute('stroke-dashoffset', String(414.7 * (1 - frac)));
+  $('#gauge-max').textContent = String(MAX);
+  $('#gauge-val').textContent = fmtW(total);
+  $('#peak').textContent = fmtW(peak) + ' W';
+  $('#active-n').textContent = String((ports || []).filter((p) => p.in_use).length);
+}
+
+function renderPorts(ports) {
+  const host = $('#ports');
+  const html = (ports || []).map((p) => {
+    const on = p.in_use;
+    const pct = Math.max(0, Math.min(100, (p.w / 100) * 100));
+    const cap = p.cap == null ? '未协商' : (p.cap + ' W' + (p.kind ? '（' + (KIND_CN[p.kind] || p.kind) + '）' : ''));
+    return `<div class="port ${on ? 'active' : ''}" style="--pc:${PORT_COLOR[p.id]}">
+      <div class="top"><div class="name">${p.label}</div>
+        <div class="st ${on ? 'on' : ''}">${on ? (PROTO_CN[p.proto] || p.proto) : '空闲'}</div></div>
+      <div class="big">${fmtW(p.w)}<small>W</small></div>
+      <div class="sub"><span>电压</span><div>${p.v.toFixed(2)} V</div></div>
+      <div class="sub"><span>电流</span><div>${p.a.toFixed(2)} A</div></div>
+      <div class="bar"><i style="width:${pct}%"></i></div>
+      <div class="cap"><span>协商上限</span><b>${cap}</b></div>
+    </div>`;
+  }).join('');
+  host.innerHTML = html;
+}
+
+function renderNeg() {
+  const p = (last.latest && last.latest.ports) || [];
+  const neg = p.filter((x) => x.cap != null);
+  let html = '';
+  if (!neg.length) {
+    html = '<dt>状态</dt><dd class="mute">当前没有任何口在协商 PD 合约</dd>';
+  } else {
+    for (const x of neg) {
+      html += `<dt>${x.label} 协商档位</dt><dd>${x.cap} W${x.kind ? ' · ' + (KIND_CN[x.kind] || x.kind) : ''}</dd>`;
+    }
+  }
+  html += `<dt>采集器</dt><dd>${last.collecting ? '运行中' : '<span class="mute">已停止</span>'}</dd>`;
+  html += `<dt>设备地址</dt><dd class="mono">${last.config.address}</dd>`;
+  html += `<dt>本地历史</dt><dd>${rows.length} 点 / 内存 ${last.historyCount} 点</dd>`;
+  $('#neg').innerHTML = html;
+  $('#in-interval').value = last.config.interval;
+  if (document.activeElement !== $('#in-tray')) $('#in-tray').checked = last.config.tray !== false;
+  if (document.activeElement !== $('#in-traymode')) $('#in-traymode').value = last.config.trayMode || 'total';
+}
+
+function renderSettings() {
+  const s = (last.latest && last.latest.settings) || null;
+  const box = $('#settings');
+  if (!s) { box.innerHTML = '<dt>状态</dt><dd class="mute">等待数据</dd>'; return; }
+  const b = (v) => (v == null ? '<span class="mute">—</span>' : (v ? '开启' : '关闭'));
+  const raw = (v) => (v == null ? '<span class="mute">—</span>' : v);
+  const en = s.ports_enabled;
+  const chips = ['c1', 'c2', 'c3', 'a'].map((k) =>
+    `<span class="chip ${en && en[k] ? 'on' : 'off'}">${k === 'a' ? 'USB-A' : k.toUpperCase()}</span>`).join('');
+  box.innerHTML = `
+    <dt>息屏时间</dt><dd>${s.screen_save_text || raw(s.screen_save_time)}</dd>
+    <dt>场景模式</dt><dd>${s.scene_mode_text || raw(s.scene_mode)}</dd>
+    <dt>端口开关</dt><dd><div class="chips">${chips}</div></dd>
+    <dt>USB-A 常开</dt><dd>${b(s.usb_a_always_on)}</dd>
+    <dt>空闲熄屏</dt><dd>${b(s.screenoff_while_idle)}</dd>
+    <dt>屏幕方向锁</dt><dd>${b(s.screen_dir_lock)}</dd>
+    <dt>协议控制</dt><dd class="mono">0x${(s.protocol_ctl == null ? 0 : s.protocol_ctl).toString(16).padStart(2, '0')}</dd>
+    <dt>语言</dt><dd>${raw(s.device_language)}</dd>
+    <dt>扩展控制字</dt><dd class="mono">0x${(s.protocol_ctl_extend == null ? 0 : s.protocol_ctl_extend).toString(16).padStart(8, '0')}</dd>`;
+}
+
+function renderRaw() {
+  const items = (last.latest && last.latest.raw) || [];
+  const tb = $('#raw').querySelector('tbody');
+  if (!items.length) { tb.innerHTML = '<tr><td colspan="5" class="muted">等待数据…</td></tr>'; return; }
+  const NAME = {1:'C1 端口字',2:'C2 端口字',3:'C3 端口字',4:'USB-A 端口字',5:'场景模式',6:'息屏时间',
+    7:'协议控制',13:'语言',15:'USB-A 常开',16:'端口开关',17:'C1/C2 协议',18:'C3/A 协议',
+    19:'空闲熄屏',20:'屏幕方向锁',21:'扩展控制字'};
+  tb.innerHTML = items.slice().sort((a, b) => a.piid - b.piid).map((it) => {
+    const v = it.type === 'u32' ? it.value + ' (0x' + it.value.toString(16).padStart(8, '0') + ')'
+      : (it.type === 'bool' ? (it.value ? 'true' : 'false') : it.value);
+    return `<tr><td>2.${it.piid}<br><span class="muted" style="font-size:0.79rem">${NAME[it.piid] || ''}</span></td>
+      <td class="mono">${it.type}</td><td class="mono">${v}</td><td class="mono">${it.raw}</td>
+      <td class="mono">0x${it.status.toString(16).padStart(4, '0')}</td></tr>`;
+  }).join('');
+}
+
+function render() {
+  if (!last) return;
+  // 产品标识（cuktech 10 ultra / 版本 / 作者）由 /api/state 的 app 字段下发。
+  // 界面对外只显示**产品版本**（1.0.0），服务/协议版本（last.version，1.3.0）仍留在
+  // /api/state.version 里给内部用，不再上界面，避免两个版本号并排让人困惑。
+  const appInfo = last.app || null;
+  const appName = (appInfo && appInfo.name) || '酷态科10号Ultra';
+  const appVer = (appInfo && appInfo.version) || last.version;
+  const appVendor = appInfo ? (appInfo.vendor || appInfo.name || '') : '';
+  // 副标题前缀用 textContent 拼，作者名（Histion）追加成可点击链接（跳作者 GitHub）。
+  // 链接样式走内联（不改 CSS / 不动布局），颜色继承副标题。
+  const devSub = $('#dev-sub');
+  devSub.textContent = 'AD1204U · ' + last.config.address + ' · 采样 ' + last.config.interval
+    + 's · v' + appVer + (appVendor ? ' · ' : '');
+  if (appVendor) {
+    const a = document.createElement('a');
+    a.href = 'https://github.com/histion';
+    a.target = '_blank';
+    a.rel = 'noopener';
+    a.textContent = appVendor;
+    a.style.color = 'inherit';
+    a.style.textDecoration = 'underline';
+    devSub.appendChild(a);
+  }
+  setLink(last.link.state, last.link.msg);
+  // A 口自动化开关：圆点与提示与 config.autoA 同步（复用 .dot / .dot.on 样式，不新增 CSS）
+  const autoOn = !!(last.config && last.config.autoA);
+  const aDot = $('#auto-a-dot');
+  if (aDot) aDot.className = 'dot' + (autoOn ? ' on' : '');
+  const aBtn = $('#btn-auto-a');
+  if (aBtn) aBtn.title = 'USB-A 自动化：' + (autoOn ? '已开启' : '已关闭')
+    + '（C 口有负载时自动开启 A 口与小电流模式，C 口空闲时自动关闭）';
+  const lt = last.latest;
+  const rssi = (lt && lt.rssi != null) ? lt.rssi : (last.link ? last.link.rssi : null);
+  $('#rssi').textContent = (rssi != null) ? (rssi + ' dBm') : '—';
+  // 窗口标题带上实时功率 —— Windows 任务栏按钮上会直接显示这串字，
+  // 最小化时也能从任务栏瞄一眼当前多少瓦。
+  const linkOk = last.link && last.link.state === 'connected';
+  // 窗口标题只留功率数字（Windows 任务栏按钮直接显示这串字）；
+  // 无功率 / 未连接时回退产品名，避免出现空标题。
+  document.title = (linkOk && lt && lt.total > 0)
+    ? (fmtW(lt.total) + ' W')
+    : '酷态科10号Ultra';
+  renderNotices();
+  const ports = lt ? lt.ports : [];
+  const total = lt ? lt.total : 0;
+  if (lt) peak = Math.max(peak, total);
+  renderGauge(ports, total);
+  renderPorts(ports);
+  renderNeg();
+  renderSettings();
+  syncControl();
+  renderRaw();
+  drawChart();
+}
+
+// ------------------------------------------------------------------ 图表
+const SERIES = [
+  { key: 'total', name: '总功率', hex: TOTAL_HEX, area: true },
+  { key: 'c1', name: 'C1', hex: PORT_HEX.c1 },
+  { key: 'c2', name: 'C2', hex: PORT_HEX.c2 },
+  { key: 'c3', name: 'C3', hex: PORT_HEX.c3 },
+  { key: 'a',  name: 'USB-A', hex: PORT_HEX.a },
+];
+
+function renderLegend() {
+  if ($('#legend').childElementCount) return;
+  $('#legend').innerHTML = SERIES.map((s) =>
+    `<span data-k="${s.key}" class="${hidden[s.key] ? 'off' : ''}"><i style="background:${s.hex}"></i>${s.name}</span>`).join('');
+  $('#legend').addEventListener('click', (e) => {
+    const sp = e.target.closest('span'); if (!sp) return;
+    const k = sp.dataset.k; hidden[k] = !hidden[k];
+    renderLegend(); drawChart();
+  });
+}
+
+function niceMax(v) {
+  if (v <= 5) return 5;
+  const steps = [10, 20, 30, 40, 50, 60, 80, 100, 120, 150, 200];
+  for (const s of steps) if (v <= s) return s;
+  return Math.ceil(v / 50) * 50;
+}
+
+function drawChart() {
+  const cv = $('#chart'), box = cv.parentElement;
+  const dpr = window.devicePixelRatio || 1;
+  const w = box.clientWidth, h = box.clientHeight;
+  if (cv.width !== w * dpr || cv.height !== h * dpr) { cv.width = w * dpr; cv.height = h * dpr; }
+  const g = cv.getContext('2d');
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  g.clearRect(0, 0, w, h);
+
+  // 图表内部度量随根字号缩放，这样窗口放大时坐标轴/字号也跟着变大，不会显得空。
+  const FS = parseFloat(getComputedStyle(document.documentElement).fontSize) || 14;
+  const K = FS / 14;                       // 相对设计基准字号(14px)的缩放系数
+  const L = FS * 3.0, R = FS * 0.86, T = FS * 0.71, B = FS * 1.71;
+  const pw = w - L - R, ph = h - T - B;
+  const now = Date.now();
+  const t0 = now - WINDOW_SEC * 1000;
+
+  let maxV = 0;
+  for (const r of rows) for (const s of SERIES) {
+    if (hidden[s.key]) continue;
+    const v = s.key === 'total' ? r.total : (r.w ? r.w[s.key] : 0);
+    if (v > maxV) maxV = v;
+  }
+  const yMax = niceMax(maxV * 1.12);
+
+  const X = (t) => L + ((t - t0) / (WINDOW_SEC * 1000)) * pw;
+  const Y = (v) => T + ph - (Math.max(0, v) / yMax) * ph;
+
+  // 网格
+  g.font = (FS * 0.71).toFixed(1) + 'px "Segoe UI",sans-serif';
+  g.textBaseline = 'middle';
+  for (let i = 0; i <= 4; i++) {
+    const v = (yMax / 4) * i, y = Y(v);
+    g.strokeStyle = 'rgba(122,162,255,.10)';
+    g.lineWidth = 1; g.beginPath(); g.moveTo(L, y + .5); g.lineTo(w - R, y + .5); g.stroke();
+    g.fillStyle = '#5d6d90'; g.textAlign = 'right';
+    g.fillText(String(Math.round(v)), L - 7 * K, y);
+  }
+  g.textAlign = 'center'; g.textBaseline = 'top';
+  for (let i = 0; i <= 4; i++) {
+    const t = t0 + (WINDOW_SEC * 1000 / 4) * i, x = X(t);
+    const d = new Date(t);
+    g.strokeStyle = 'rgba(122,162,255,.07)';
+    g.beginPath(); g.moveTo(x + .5, T); g.lineTo(x + .5, T + ph); g.stroke();
+    g.fillStyle = '#5d6d90';
+    g.fillText(d.toTimeString().slice(0, 8), x, T + ph + 6 * K);
+  }
+  g.fillStyle = '#3f4c68'; g.textAlign = 'left'; g.textBaseline = 'top';
+  g.fillText('W', 6 * K, T - 1);
+
+  if (rows.length < 2) {
+    g.fillStyle = '#3f4c68'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.font = (13 * K).toFixed(1) + 'px "Segoe UI",sans-serif';
+    g.fillText('正在积累数据…', L + pw / 2, T + ph / 2);
+    return;
+  }
+
+  for (const s of SERIES) {
+    if (hidden[s.key]) continue;
+    const pts = rows.map((r) => ({ x: X(r.at), y: Y(s.key === 'total' ? r.total : (r.w ? r.w[s.key] : 0)) }));
+    if (s.area) {
+      const grad = g.createLinearGradient(0, T, 0, T + ph);
+      grad.addColorStop(0, 'rgba(56,189,248,.28)');
+      grad.addColorStop(1, 'rgba(56,189,248,0)');
+      g.beginPath(); g.moveTo(pts[0].x, T + ph);
+      for (const p of pts) g.lineTo(p.x, p.y);
+      g.lineTo(pts[pts.length - 1].x, T + ph); g.closePath();
+      g.fillStyle = grad; g.fill();
+    }
+    g.beginPath();
+    for (let i = 0; i < pts.length; i++) (i ? g.lineTo : g.moveTo).call(g, pts[i].x, pts[i].y);
+    g.strokeStyle = s.hex; g.lineWidth = (s.area ? 2.2 : 1.6) * K;
+    g.lineJoin = 'round'; g.lineCap = 'round';
+    if (s.area) { g.shadowColor = s.hex; g.shadowBlur = 12 * K; }
+    g.stroke(); g.shadowBlur = 0;
+
+    const lp = pts[pts.length - 1];
+    if (lp.x > L - 2) {
+      g.beginPath(); g.arc(lp.x, lp.y, (s.area ? 3.6 : 2.6) * K, 0, Math.PI * 2);
+      g.fillStyle = s.hex; g.fill();
+      g.strokeStyle = 'rgba(7,11,20,.9)'; g.lineWidth = 2 * K; g.stroke();
+    }
+  }
+}
+
+// 悬停提示
+(function bindTip() {
+  const cv = $('#chart'), tip = $('#tip');
+  cv.addEventListener('mousemove', (e) => {
+    if (rows.length < 1) return;
+    const r = cv.getBoundingClientRect();
+    const x = e.clientX - r.left;
+    // 与 drawChart 用同一套缩放：坐标轴左边距 L=3rem、右侧 R=0.86rem
+    const K = (parseFloat(getComputedStyle(document.documentElement).fontSize) || 14) / 14;
+    const now = Date.now(), t0 = now - WINDOW_SEC * 1000;
+    const t = t0 + (x - 42 * K) / Math.max(1, (r.width - 54 * K)) * WINDOW_SEC * 1000;
+    let best = rows[0];
+    for (const q of rows) if (Math.abs(q.at - t) < Math.abs(best.at - t)) best = q;
+    const dt = new Date(best.at);
+    let h = `<b>${dt.toTimeString().slice(0, 8)}</b>`;
+    for (const s of SERIES) {
+      if (hidden[s.key]) continue;
+      const v = s.key === 'total' ? best.total : (best.w ? best.w[s.key] : 0);
+      h += `<br><span style="color:${s.hex}">■</span> ${s.name} <b style="float:right;margin-left:1rem">${fmtW(v)} W</b>`;
+    }
+    tip.innerHTML = h;
+    tip.style.opacity = '1';
+    const tw = tip.offsetWidth;
+    tip.style.left = Math.min(Math.max(4, x + 14 * K), r.width - tw - 4) + 'px';
+    tip.style.top = Math.max(4, e.clientY - r.top - 46 * K) + 'px';
+  });
+  cv.addEventListener('mouseleave', () => { tip.style.opacity = '0'; });
+})();
+
+// ------------------------------------------------------------------ 日志
+async function pullLog() {
+  try {
+    const j = await api('/api/log');
+    const el = $('#log');
+    el.textContent = (j.lines || []).join('\n');
+    el.scrollTop = el.scrollHeight;
+    $('#log-tag').textContent = (j.lines || []).length + ' 行';
+  } catch (_) {}
+}
+
+// ------------------------------------------------------------------ 登录
+function openLogin(open) {
+  $('#login-layer').classList.toggle('hidden', !open);
+}
+$('#btn-login').onclick = () => openLogin(true);
+$('#btn-login-close').onclick = () => openLogin(false);
+
+$('#btn-login-start').onclick = async () => {
+  const btn = $('#btn-login-start');
+  btn.disabled = true; btn.textContent = '正在申请…';
+  $('#login-msg').textContent = '正在向小米云申请二维码…';
+  const s = await api('/api/login/start', { method: 'POST' });
+  if (!s.ok) {
+    $('#login-msg').innerHTML = '<span style="color:var(--bad)">' + (s.error || '申请失败') + '</span>';
+    btn.disabled = false; btn.textContent = '重试'; return;
+  }
+  $('#qrbox').innerHTML = '<img src="/api/login/qr.png?t=' + Date.now() + '" alt="登录二维码">';
+  $('#login-msg').textContent = '请用米家 App 扫码，然后在手机上确认授权（二维码 ' + s.timeout + ' 秒内有效）…';
+  const p = await api('/api/login/poll', { method: 'POST' });
+  if (!p.ok) {
+    $('#login-msg').innerHTML = '<span style="color:var(--bad)">' + (p.error || '无法开始等待') + '</span>';
+    btn.disabled = false; btn.textContent = '重试'; return;
+  }
+  btn.textContent = '等待授权…';
+  const iv = setInterval(async () => {
+    const st = await api('/api/state');
+    if (st.login && !st.login.running) {
+      clearInterval(iv);
+      btn.disabled = false;
+      if (st.login.result && st.login.result.ok) {
+        $('#login-msg').innerHTML = '<span style="color:var(--ok)">✓ 授权成功，正在重启采集器…</span>';
+        setTimeout(() => openLogin(false), 1600);
+      } else {
+        $('#login-msg').innerHTML = '<span style="color:var(--bad)">✗ ' +
+          ((st.login.result && st.login.result.error) || '登录失败') + '</span>';
+        btn.textContent = '重新生成二维码';
+      }
+    }
+  }, 2000);
+};
+
+// ------------------------------------------------------------------ 操作
+$('#btn-reconnect').onclick = async () => { await api('/api/reconnect', { method: 'POST' }); tick(); };
+// A 口自动化开关：点击切换 config.autoA，按返回 / 下一帧 state 更新圆点与提示
+$('#btn-auto-a').onclick = async () => {
+  const cur = !!(last && last.config && last.config.autoA);
+  const j = await api('/api/config', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ autoA: !cur }),
+  });
+  if (j && j.config && last) last.config.autoA = !!j.config.autoA;
+  render();
+};
+$('#btn-quit').onclick = async () => { try { await api('/api/quit', { method: 'POST' }); } catch (_) {} window.close(); };
+$('#btn-cfg').onclick = async () => {
+  const v = parseFloat($('#in-interval').value);
+  const j = await api('/api/config', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ interval: v, tray: $('#in-tray').checked }),
+  });
+  $('#btn-cfg').textContent = j.ok ? '已应用' : '失败';
+  setTimeout(() => { $('#btn-cfg').textContent = '应用'; }, 1200);
+};
+// 托盘开关单独即时生效，不用点「应用」
+$('#in-tray').onchange = async (e) => {
+  await api('/api/config', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ tray: e.target.checked }),
+  });
+};
+// 托盘显示模式（仅总功率 / 全部功率轮流）同样即时生效
+$('#in-traymode').onchange = async (e) => {
+  await api('/api/config', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ trayMode: e.target.value }),
+  });
+};
+$('#btn-shortcut').onclick = async () => {
+  const b = $('#btn-shortcut');
+  b.disabled = true; b.textContent = '正在创建…';
+  const j = await api('/api/shortcut', { method: 'POST' });
+  b.textContent = j.ok ? '已创建（见桌面）' : '创建失败';
+  setTimeout(() => { b.disabled = false; b.textContent = '创建桌面快捷方式'; }, 2200);
+};
+window.addEventListener('resize', () => drawChart());
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') openLogin(false); });
+
+// ------------------------------------------------------------------ 控制面板
+const PORT_LABEL = { c1: 'C1', c2: 'C2', c3: 'C3', a: 'USB-A' };
+const SCENE_OPTS = [[1, 'AI'], [2, '数码生态'], [3, '单口'], [4, '均衡']];
+// 息屏取值：米家插件逆向确认 1=5分/2=10分/3=30分/4=常亮/5=1分（0 非法）
+const SCREEN_OPTS = [[1, '5 分钟'], [2, '10 分钟'], [3, '30 分钟'], [4, '常亮'], [5, '1 分钟']];
+const LANG_OPTS = [[0, 'English'], [1, '中文']];
+const SW_KEY = { 15: 'usb_a_always_on', 19: 'screenoff_while_idle', 20: 'screen_dir_lock' };
+
+// 协议开关位定义（PIID 21 = 2.21 protocol-ctl-extend，u32 掩码）。
+// 与 collector.py 的 PROTO_SWITCH_BITS 逐位一致，2026-09-22 真机逐位验证过：
+//   翻 A 口 UFCS 的 bit24 → 回读 0x02030f0f，还原 → 0x03030f0f（出厂值）。
+// c1 的 bit3、c2 的 bit11 是固定为 1 的保留位，这里不列出来，翻转时自然不动。
+const PROTO_LAYOUT = [
+  ['c1', [['pd', 0, 'PD'], ['pps', 1, 'PPS'], ['ufcs', 2, 'UFCS']]],
+  ['c2', [['pd', 8, 'PD'], ['pps', 9, 'PPS'], ['ufcs', 10, 'UFCS']]],
+  ['c3', [['ufcs', 16, 'UFCS'], ['scp', 17, 'SCP']]],
+  ['a', [['ufcs', 24, 'UFCS'], ['scp', 25, 'SCP']]],
+];
+
+let ctlMsgTimer = null;
+function ctlMsg(msg, bad) {
+  const el = $('#ctl-tag');
+  el.textContent = msg;
+  el.style.color = bad ? 'var(--bad)' : 'var(--ok)';
+  clearTimeout(ctlMsgTimer);
+  ctlMsgTimer = setTimeout(() => {
+    el.style.color = ''; el.textContent = '写入需要蓝牙已连接';
+  }, 4000);
+}
+
+async function ctl(payload) {
+  const r = await api('/api/control', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (r && r.ok) ctlMsg(r.noop ? '与当前值一致，未改动' : '已下发并确认');
+  else ctlMsg((r && r.error) || '操作失败', true);
+  tick();
+  return r;
+}
+
+function fillSelect(sel, opts) {
+  sel.innerHTML = opts.map(([v, t]) => `<option value="${v}">${t}</option>`).join('');
+}
+
+function buildControl() {
+  fillSelect($('#sel-scene'), SCENE_OPTS);
+  fillSelect($('#sel-screen'), SCREEN_OPTS);
+  fillSelect($('#sel-lang'), LANG_OPTS);
+
+  $('#ctl-ports').innerHTML = ['c1', 'c2', 'c3', 'a'].map((p) =>
+    `<div class="sw-row"><b>${PORT_LABEL[p]}</b><div class="switch" data-port="${p}"></div></div>`).join('');
+  $('#ctl-ports').addEventListener('click', (e) => {
+    const sw = e.target.closest('.switch'); if (!sw) return;
+    const on = !sw.classList.contains('on');
+    sw.classList.add('busy');
+    ctl({ action: 'port', port: sw.dataset.port, on });
+  });
+
+  // 协议开关面板。位定义与 collector.py 的 PROTO_SWITCH_BITS 一致（2026-09-22 逐位实测：
+  // 翻 A 口 UFCS 的 bit24 → 回读 0x02030f0f，还原 → 0x03030f0f）。
+  // c1/c2 各位组里第 4 位是固定为 1 的保留位，这里只翻转目标位，保留位天然不动。
+  $('#ctl-proto').innerHTML = PROTO_LAYOUT.flatMap(([p, list]) =>
+    list.map(([sw, bit, lab]) =>
+      `<div class="sw-row">${PORT_LABEL[p]} · ${lab}` +
+      `<div class="switch" data-port="${p}" data-sw="${sw}"></div></div>`)).join('');
+  $('#ctl-proto').addEventListener('click', (e) => {
+    const sw = e.target.closest('.switch'); if (!sw) return;
+    const on = !sw.classList.contains('on');
+    sw.classList.add('busy');
+    ctl({ action: 'protocol', port: sw.dataset.port, sw: sw.dataset.sw, on });
+  });
+  const protoMask = PROTO_LAYOUT.flatMap(([, l]) => l.map(([, bit]) => bit))
+    .reduce((a, b) => a | (1 << b), 0) >>> 0;
+  const writeProtoMask = (on) => {
+    const s = (last && last.latest && last.latest.settings) || {};
+    const cur = typeof s.protocol_ctl_extend === 'number' ? s.protocol_ctl_extend : null;
+    if (cur == null) return ctlMsg('还没读到协议开关的当前值，等一次轮询后再试', true);
+    const next = on ? ((cur | protoMask) >>> 0) : ((cur & ~protoMask) >>> 0);
+    if (next === cur) return ctlMsg('与当前值一致，未改动');
+    ctl({ action: 'set', piid: 21, value: next });
+  };
+  $('#btn-proto-on').onclick = () => writeProtoMask(true);
+  $('#btn-proto-off').onclick = () => writeProtoMask(false);
+
+  // 本机固件没有「定时关闭」：官方规格表把它记在 2.9–2.12，实测这四个属性不存在。
+  // 说明文字直接写在 HTML 的高级区里，这里不再生成空面板。
+
+  $('#sel-scene').onchange = (e) => ctl({ action: 'set', piid: 5, value: +e.target.value });
+  $('#sel-screen').onchange = (e) => ctl({ action: 'set', piid: 6, value: +e.target.value });
+  $('#sel-lang').onchange = (e) => ctl({ action: 'set', piid: 13, value: +e.target.value });
+
+  for (const el of document.querySelectorAll('.switch[data-piid]')) {
+    el.addEventListener('click', () => {
+      const s = (last && last.latest && last.latest.settings) || {};
+      el.classList.add('busy');
+      ctl({ action: 'set', piid: +el.dataset.piid, value: s[SW_KEY[+el.dataset.piid]] ? 0 : 1 });
+    });
+  }
+
+  $('#btn-all-on').onclick = () => ctl({ action: 'port', port: 'all', on: true });
+  $('#btn-all-off').onclick = () => ctl({ action: 'port', port: 'all', on: false });
+
+  $('#btn-defaults').onclick = async () => {
+    const b = $('#btn-defaults');
+    b.disabled = true; b.textContent = '正在逐条下发…';
+    const r = await ctl({ action: 'defaults' });
+    b.disabled = false; b.textContent = '恢复常用默认';
+  };
+
+  const readHex = (sel) => {
+    const raw = String($(sel).value || '').trim().replace(/^0x/i, '');
+    if (!raw) return null;
+    const n = parseInt(raw, 16);
+    return Number.isFinite(n) ? n : null;
+  };
+
+  $('#btn-adv').onclick = () => {
+    const pc = readHex('#in-pc'), p8 = readHex('#in-p8'), pce = readHex('#in-pce');
+    if (![pc, p8, pce].some((v) => v != null)) return ctlMsg('三栏都没填，没有下发', true);
+    if (pc != null) ctl({ action: 'set', piid: 7, value: pc, advanced: true });
+    if (p8 != null) ctl({ action: 'set', piid: 8, value: p8, advanced: true });
+    if (pce != null) ctl({ action: 'set', piid: 21, value: pce });
+  };
+
+  $('#btn-ext').onclick = async () => {
+    const b = $('#btn-ext');
+    b.disabled = true; b.textContent = '正在读取…';
+    const r = await api('/api/control', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'ext' }),
+    });
+    b.disabled = false; b.textContent = '读取扩展属性 2.8';
+    const box = $('#ext-res');
+    if (r && r.ok) {
+      const v = r.values && r.values['2.08'];
+      box.innerHTML = `<b style="color:var(--ok)">扩展读取成功</b>：2.8 = ${v}`
+        + `（0x${Number(v || 0).toString(16).padStart(2, '0')}）`
+        + (v === 0 ? '<br><span class="muted">值为 0，即「端口关闭设置」当前是关闭状态。</span>' : '');
+    } else {
+      box.innerHTML = '<span style="color:var(--bad)">扩展读取失败：'
+        + ((r && r.error) || '未知原因') + '</span>';
+    }
+  };
+
+  $('#btn-reset').onclick = async () => {
+    const ok1 = confirm('「恢复出厂设置」会把充电头的端口开关、场景模式、息屏时间、'
+      + '协议开关等全部恢复为出厂值，且无法撤销。\n\n确定要继续吗？');
+    if (!ok1) return;
+    if (!confirm('最后确认：现在真的发送「恢复默认设置」？')) return;
+    const b = $('#btn-reset');
+    b.disabled = true; b.textContent = '正在下发…';
+    const r = await api('/api/control', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'reset' }),
+    });
+    b.disabled = false; b.textContent = '恢复出厂设置';
+    ctlMsg(r && r.ok ? '已发送恢复默认设置' : ((r && r.error) || '失败'), !(r && r.ok));
+    tick();
+  };
+
+  $('#btn-sweep').onclick = async () => {
+    const b = $('#btn-sweep');
+    b.disabled = true; b.textContent = '正在扫描…（采集已暂停）';
+    $('#sweep-out').innerHTML = '<span class="muted">正在认证并扫描 siid=2 全部未知属性，约 20-40 秒…</span>';
+    const r = await api('/api/sweep', { method: 'POST' });
+    b.disabled = false; b.textContent = '扫描隐藏属性 / 温度';
+    renderSweep(r);
+  };
+}
+
+function renderSweep(r) {
+  const box = $('#sweep-out');
+  if (!r || !r.ok) {
+    box.innerHTML = '<span style="color:var(--bad)">扫描失败：' + ((r && r.error) || '未知原因') + '</span>';
+    return;
+  }
+  const rows = r.rows || [], found = r.found || [];
+  const ct = r.control || { attempts: [] };
+  const ctlLine = (ct.attempts || []).map((a) =>
+    `· ${a.label}：发 ${a.sent} 条 → ` + (a.got ? `收到 ${a.got} 条` : `无应答（${(a.error || '').split(':')[0]}）`)).join('<br>');
+
+  let h = `<b>① 通道自检</b><br>${ctlLine}<br>`;
+  h += ct.ok
+    ? '　→ 通道正常。设备只回答完整属性表；<b>多加一个属性就整批丢弃</b>，所以无法枚举未知属性。<br>'
+    : '　→ <span style="color:var(--warn)">连完整属性表都没应答，本次结论不可信。</span><br>';
+
+  h += `<b>② 未知属性 ${r.lo ? '2.0x' + r.lo.toString(16) : ''}…2.0x${(r.hi || 0).toString(16)}</b><br>`
+    + `共问 ${rows.length} 个：可读 <b>${found.length}</b> · 表里没有 <b>${r.missing || 0}</b> · 整批被丢 <b>${r.dropped || 0}</b><br>`;
+  h += found.length
+    ? '<span style="color:var(--warn)">发现可用属性：</span><br>'
+      + found.map((f) => `· 2.${f.piid} = ${f.value}（${f.type}，raw ${f.raw}）`).join('<br>')
+    : '没有可读的新属性。<br>';
+
+  const vs = r.vendor || [];
+  const nf = r.notify || [];
+  h += `<b>③ GATT</b>：${(r.services || []).length} 个服务；厂商服务 0xAF00 下 `
+    + `${vs.length} 个特征`
+    + (vs.length ? '（' + vs.map((v) => v.uuid.slice(4, 8) + '[' + v.props.join(',') + ']').join('、') + '）' : '')
+    + '。<br>';
+  if (nf.length) {
+    h += '　notify 侦听：' + nf.map((x) =>
+      x.error ? `${x.uuid.slice(4, 8)} 订阅失败（${x.error.split(':')[0]}）` :
+        `${x.uuid.slice(4, 8)} 收到 ${x.count} 帧`).join('、') + '。<br>';
+  }
+  h += '<br><b>结论</b>：温度不在这条 BLE 通道上 —— 属性表里没有、未知属性问不出来、'
+    + '厂商服务既不可读也不主动推数据。充电头屏幕上的温度来自内部 NTC，数据在 MCU 里，'
+    + '但**没有对外出口**。';
+  box.innerHTML = h;
+}
+
+/** 把设备当前状态灌进修控件；正在输入的控件不覆盖。 */
+function syncControl() {
+  const s = (last && last.latest && last.latest.settings) || null;
+  if (!s) return;
+  const en = s.ports_enabled || {};
+  for (const el of document.querySelectorAll('#ctl-ports .switch')) {
+    el.classList.toggle('on', !!en[el.dataset.port]);
+    el.classList.remove('busy');
+  }
+  // 协议开关（2.21）：settings.protocol_switches = {端口:{协议:bool}}。
+  // 设备在 2.21 变化时会主动推一帧，所以点完开关这里很快就能看到新状态。
+  const ps = s.protocol_switches || null;
+  if (ps) {
+    for (const el of document.querySelectorAll('#ctl-proto .switch')) {
+      const on = !!(ps[el.dataset.port] && ps[el.dataset.port][el.dataset.sw]);
+      el.classList.toggle('on', on);
+      el.classList.remove('busy');
+    }
+  }
+  for (const el of document.querySelectorAll('.switch[data-piid]')) {
+    el.classList.toggle('on', !!s[SW_KEY[+el.dataset.piid]]);
+    el.classList.remove('busy');
+  }
+  if (document.activeElement !== $('#sel-scene') && s.scene_mode != null) $('#sel-scene').value = s.scene_mode;
+  if (document.activeElement !== $('#sel-screen') && s.screen_save_time != null) $('#sel-screen').value = s.screen_save_time;
+  if (document.activeElement !== $('#sel-lang') && s.device_language != null) $('#sel-lang').value = s.device_language;
+
+  if (document.activeElement !== $('#in-pc') && !$('#in-pc').value && s.protocol_ctl != null)
+    $('#in-pc').placeholder = '0x' + s.protocol_ctl.toString(16).padStart(2, '0');
+  if (document.activeElement !== $('#in-pce') && !$('#in-pce').value && s.protocol_ctl_extend != null)
+    $('#in-pce').placeholder = '0x' + s.protocol_ctl_extend.toString(16).padStart(8, '0');
+}
+
+// ------------------------------------------------------------------ 用电量
+async function pullEnergy() {
+  try { renderEnergy(await api('/api/energy?days=7')); } catch (_) {}
+}
+
+function renderEnergy(e) {
+  if (!e || !e.ok) return;
+  $('#e-today').textContent = (e.today.wh || 0).toFixed(2);
+  $('#e-total').textContent = (e.totalWh || 0).toFixed(2);
+  const c = e.current;
+  $('#e-sess').textContent = c ? c.wh.toFixed(2) : '—';
+  $('#energy-tag').textContent = c
+    ? `充电中 · 峰 ${fmtW(c.peak)} W · ${Math.max(1, Math.round(c.ms / 60000))} 分`
+    : '本机积分';
+
+  const days = e.days || [];
+  const max = Math.max(1e-6, ...days.map((d) => d.wh));
+  const today = days.length ? days[days.length - 1].day : '';
+  $('#ebars').innerHTML = days.map((d) => {
+    const h = Math.max(1.5, (d.wh / max) * 100);
+    return `<div class="col ${d.day === today ? 'today' : ''} ${d.wh <= 0 ? 'zero' : ''}"
+      title="${d.day} · ${d.wh.toFixed(3)} Wh">
+      <div class="val">${d.wh > 0 ? d.wh.toFixed(2) : ''}</div>
+      <div class="barwrap"><div class="b" style="height:${h}%"></div></div>
+      <div class="lbl">${d.day.slice(5).replace('-', '/')}</div></div>`;
+  }).join('');
+
+  const pk = e.ports || {};
+  const pmax = Math.max(1e-6, ...['c1', 'c2', 'c3', 'a'].map((k) => pk[k] || 0));
+  $('#e-ports').innerHTML = ['c1', 'c2', 'c3', 'a'].map((k) =>
+    `<dt>${PORT_LABEL[k]}</dt><dd>${(pk[k] || 0).toFixed(3)} Wh
+      <span class="muted">${Math.round(((pk[k] || 0) / pmax) * 100)}%</span></dd>`).join('');
+
+  const ss = e.sessions || [];
+  $('#e-sessions').innerHTML = ss.length
+    ? ss.slice(0, 5).map((s) => {
+        const t = new Date(s.start).toLocaleString('zh-CN',
+          { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false });
+        return `<dt>${t}</dt><dd>${s.wh.toFixed(2)} Wh · ${Math.max(1, Math.round(s.ms / 60000))} 分 · 峰 ${fmtW(s.peak)} W</dd>`;
+      }).join('')
+    : '<dt>状态</dt><dd class="mute">还没有完整的充电会话</dd>';
+}
+
+// ------------------------------------------------------------------ 启动
+renderLegend();
+buildControl();
+tick();
+pullEnergy();
+setInterval(tick, 1500);
+setInterval(pullEnergy, 8000);
+setInterval(pullLog, 3000);
+pullLog();
+</script>
+</body>
+</html>

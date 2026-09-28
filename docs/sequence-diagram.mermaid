@@ -1,0 +1,101 @@
+sequenceDiagram
+    %% 酷态科10号Ultra Python 单文件版 —— 关键调用时序
+    autonumber
+    actor U as 用户
+    participant BOOT as PyInstaller引导器
+    participant MAIN as pyapp.__main__
+    participant HTTP as http_server(App)
+    participant STATE as state_store
+    participant BRIDGE as collector_bridge
+    participant COL as 子进程(collector.py)
+    participant LED as energy_ledger
+    participant AA as auto_a
+    participant WIN as Edge --app
+
+    %% ---------- 冷启动 ----------
+    Note over U,COL: 冷启动（默认角色 = server）
+    U->>BOOT: 双击 dist_py\cuktech 10 ultra.exe
+    BOOT->>BOOT: 自解压到 %TEMP%\_MEIxxxx（~3.6s），设 _MEIPASS2
+    BOOT->>MAIN: 执行 pyapp\__main__.py
+    MAIN->>MAIN: apply_env_contract() + ensure_runtime_assets()
+    MAIN->>MAIN: maybe_import_data()（迁移旧 token/账本）
+    MAIN->>MAIN: cleanup_legacy_app_tree()（异步，删旧 app\ 树）
+    MAIN->>HTTP: probe(running.lock.port)?
+    alt 已有实例
+        MAIN->>WIN: launch_window(url)
+        MAIN->>MAIN: exit(0)
+    else 无实例
+        MAIN->>HTTP: ThreadingHTTPServer.listen(0)
+        MAIN->>STATE: 写 running.lock / ready.json
+        MAIN->>WIN: launch_window(url)
+        MAIN->>BRIDGE: start()
+        BRIDGE->>COL: subprocess([exe,"--role","collector",...]) 复用_MEIPASS2 → 0.21s
+        COL-->>BRIDGE: {"t":"hello", writable, switches}
+        BRIDGE->>STATE: 存 writable/switches
+        COL-->>BRIDGE: {"t":"link","state":"connected"}
+        loop 每 interval 秒
+            COL-->>BRIDGE: {"t":"state", ports, settings, at}
+            BRIDGE->>STATE: latest=obj; push_history()
+            STATE->>LED: integrate(sample); touch()
+            STATE->>AA: evaluate()（若 autoA 开启）
+        end
+    end
+
+    %% ---------- /api/state 轮询 ----------
+    Note over WIN,LED: 前端每秒轮询
+    WIN->>HTTP: GET /api/state
+    HTTP->>STATE: 读取 link/latest/history/writable/switches/sweep
+    HTTP->>LED: 汇总 today/total/current
+    HTTP-->>WIN: 200 { ok,version,app,now,link,collecting,config,env,latest,historyCount,writable,switches,sweep,energy,login }
+
+    %% ---------- 控制写入 ----------
+    Note over WIN,COL: 用户点“关闭 C1 口”
+    WIN->>HTTP: POST /api/control {action:"port",port:"c1",on:false}
+    HTTP->>BRIDGE: control.handle_control()
+    BRIDGE->>STATE: 读 latest.settings.port_ctl（位掩码）
+    BRIDGE->>COL: stdin {"id":n,"cmd":"set","piid":16,"value":next}
+    COL-->>BRIDGE: {"t":"ack","id":n,"ok":true,"piid":16,"value":next,"readback":next}
+    BRIDGE-->>HTTP: ack
+    HTTP-->>WIN: 200 { ok:true, piid:16, value, readback }
+
+    %% ---------- A 口自动化 ----------
+    Note over AA,COL: autoA 开启时，每帧状态评估一次
+    STATE->>AA: evaluate()
+    AA->>AA: compute_auto_a_action(latest, current)
+    alt 目标=开 且 连续2帧一致 且 距上次>=3000ms
+        AA->>BRIDGE: set_port("a","on")  → ack
+        AA->>BRIDGE: set_prop(0x0F,1)   → ack
+        AA->>STATE: push_log("A口自动化：C 口出现负载 → 开启 USB-A + 小电流")
+    else 迟滞区间 或 目标已满足
+        AA->>AA: 保持 / reset_counters()
+    else 同目标连续3次无效
+        AA->>STATE: push_log("…连续 3 次写入后状态仍未变化，暂停重试")
+    end
+
+    %% ---------- 扫码登录 ----------
+    Note over U,COL: 扫码登录（二维码 → 轮询 → token）
+    U->>HTTP: POST /api/login/start
+    HTTP->>MAIN: LoginProxy.start()
+    MAIN->>COL: subprocess([exe,"--role","login-qr"])
+    COL-->>MAIN: {"ok":true,"timeout":280,...} → 写 data\qr.png
+    HTTP-->>WIN: { ok:true, timeout, ts }
+    WIN->>HTTP: GET /api/login/qr.png
+    HTTP-->>WIN: 200 image/png（读 data\qr.png）
+    U->>HTTP: POST /api/login/poll
+    HTTP->>MAIN: LoginProxy.poll()（异步）
+    MAIN->>COL: subprocess([exe,"--role","login-poll","--wait","280","--verbose"])
+    COL-->>MAIN: 轮询小米云 → 写 data\cuktech.token
+    MAIN->>MAIN: 自动发现设备地址 → save config
+    MAIN->>BRIDGE: restart_soon()（先 kill 旧采集器再起新的）
+    WIN->>HTTP: GET /api/state
+    HTTP-->>WIN: login.result = { ok:true, region, tokenLen }
+
+    %% ---------- 退出 ----------
+    Note over U,COL: 退出
+    U->>HTTP: POST /api/quit
+    HTTP-->>U: 200 { ok:true }
+    HTTP->>LED: save(force=True)
+    HTTP->>BRIDGE: stop()（kill collector 子进程）
+    HTTP->>MAIN: kill(login/sweep 子进程)
+    HTTP->>MAIN: 停止托盘 → 删 lock/ready → exit(0)
+    MAIN-->>BOOT: 进程退出 → 引导器删除 _MEIxxxx（子进程已死，删除成功）

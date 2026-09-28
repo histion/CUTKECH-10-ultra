@@ -1,0 +1,13 @@
+# 构建期 + 运行期依赖（打包机需要，不进产物）。
+# 运行：build_py\重新打包exe(Python版).bat 首次会自动建 .venv 并 pip install -r 本文件。
+# 版本锁定依据：本机实测构建通过的版本组合（PyInstaller onefile ≈ 17MB）。
+
+# —— 打包器 ——
+pyinstaller==6.22.3
+
+# —— 运行期第三方依赖（会被 PyInstaller 打进 exe）——
+bleak==3.0.2
+aiohttp==3.14.3
+cryptography==50.0.1
+cffi==2.1.1
+winrt-Windows.Devices.Bluetooth==3.2.1

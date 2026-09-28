@@ -1,0 +1,193 @@
+classDiagram
+    %% 酷态科10号Ultra Python 单文件版 —— 类与模块关系
+    %% 说明：App 为门面；AppState 为线程安全运行态；其余为领域/集成组件。
+
+    class App {
+        +AppState state
+        +EnergyLedger energy
+        +CollectorBridge bridge
+        +LoginProxy login
+        +AutoARunner auto_a
+        +ConfigStore config
+        +TrayManager tray
+        +int port
+        +int last_activity
+        +build_state_payload() dict
+        +build_energy_payload(days) dict
+        +handle_api(method, path, query, body) tuple
+        +on_activity() None
+    }
+
+    class AppState {
+        +RLock lock
+        +Process collector
+        +bool collecting
+        +int restarts
+        +float last_spawn_at
+        +dict latest
+        +dict link
+        +list history
+        +list log_lines
+        +list writable
+        +list switches
+        +dict sweep
+        +push_history(sample) None
+        +push_log(line) None
+        +snapshot_link() dict
+    }
+
+    class EnergyLedger {
+        +dict data
+        +bool dirty
+        +Timer save_timer
+        +load() None
+        +save(force) None
+        +touch() None
+        +integrate(sample) None
+        +backfill() int
+        +snapshot(days) dict
+        +sample_from(row) dict$
+        +track_session(s) None
+        -integrate_step(prev, cur) None
+    }
+
+    class AutoARunner {
+        +bool busy
+        +float last_action_at
+        +str pending_key
+        +int pending_count
+        +dict budget
+        +evaluate() None
+        +reset_counters() None
+        -apply(result) None
+    }
+
+    class CollectorBridge {
+        +AppState state
+        +App app
+        +start() dict
+        +stop() None
+        +restart_soon() None
+        +send_command(obj, timeout_ms) dict
+        +on_line(obj) None
+        +run_sweep(lo, hi) dict
+        -spawn_child() Process
+        -reject_pending(reason) None
+    }
+
+    class LoginProxy {
+        +bool running
+        +str kind
+        +float started_at
+        +dict result
+        +Process proc
+        +start() dict
+        +poll() dict
+        +current() dict
+        -run_py(role, args, timeout_ms) dict
+        -last_json(text) dict$
+    }
+
+    class ConfigStore {
+        +str path
+        +dict data
+        +load() dict
+        +save(cfg) None
+        +validate(cfg) dict$
+    }
+
+    class TrayManager {
+        +Process proc
+        +int tries
+        +bool stopping
+        +start() None
+        +stop() None
+    }
+
+    class Control {
+        <<module>>
+        +set_port(bridge, port, action) dict
+        +set_protocol(bridge, port, sw, on) dict
+        +set_prop(bridge, piid, value, advanced) dict
+        +handle_control(bridge, body) dict
+        +DEFAULTS list
+    }
+
+    class Shortcut {
+        <<module>>
+        +create_shortcut(on_log) dict
+    }
+
+    class BrowserLauncher {
+        <<module>>
+        +find_browser() str
+        +launch_window(url, on_log) dict
+        +cleanup_legacy_profile(on_log) bool
+        -reg_default(key) str
+        -known_paths() list
+    }
+
+    class Paths {
+        <<module>>
+        +frozen() bool
+        +meipass_dir() Path
+        +exe_path() Path
+        +root_dir() Path
+        +data_dir() Path
+        +resource_path(rel) Path
+        +ensure_runtime_assets() dict
+        +apply_env_contract() None
+        +maybe_import_data() int
+        +cleanup_legacy_app_tree(on_log) None
+        +child_argv(role, extra) list
+        +child_env() dict
+    }
+
+    class AutoLogic {
+        <<module>>
+        +LOAD_W float
+        +RELEASE_W float
+        +LOW_CURRENT_PIID int
+        +C_PORTS list
+        +port_w(ports, id) float
+        +current_state_from_latest(latest) dict
+        +compute_auto_a_action(latest, current) dict
+        +consume_write_budget(budget, key, max_writes) dict
+    }
+
+    class HttpHandler {
+        +App app
+        +do_GET() None
+        +do_POST() None
+        -send_json(code, obj) None
+        -serve_static(rel) None
+        -read_body() dict
+    }
+
+    %% 关系
+    App --> AppState : holds
+    App --> EnergyLedger : holds
+    App --> CollectorBridge : holds
+    App --> LoginProxy : holds
+    App --> AutoARunner : holds
+    App --> ConfigStore : holds
+    App --> TrayManager : holds
+    App ..> Control : uses
+    App ..> Shortcut : uses
+    App ..> BrowserLauncher : uses
+    App ..> Paths : uses
+    HttpHandler --> App : delegates
+
+    CollectorBridge --> AppState : mutates
+    CollectorBridge ..> AutoARunner : triggers evaluate
+    CollectorBridge ..> Paths : child_argv
+    LoginProxy --> AppState : updates login
+    LoginProxy ..> CollectorBridge : restart_soon
+    AutoARunner ..> AutoLogic : pure functions
+    AutoARunner ..> Control : set_port/set_prop
+    EnergyLedger --> AppState : reads history sample
+    App ..> AutoLogic : uses
+
+    note for AppState "字段名/语义对齐 server.js 的 const state"
+    note for AutoLogic "对齐 autoA.js：LOAD_W=0.5 / RELEASE_W=0.2 / LOW_CURRENT_PIID=0x0F"
+    note for CollectorBridge "子进程 = exe 自我重入(--role collector)，复用 collector.py 原文件"
