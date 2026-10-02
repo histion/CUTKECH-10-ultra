@@ -32,8 +32,9 @@ SPEC = ROOT / "build_py" / "cuktech10ultra.spec"
 VERSION_FILE = ROOT / "build_py" / "_version_info.txt"
 EXE_NAME = "cuktech 10 ultra.exe"
 
-# 版本资源字段（产品版本 1.0.0，与前端显示 v1.0.0 一致）。
-VERSION = "1.0.0"
+# 版本资源字段（产品版本，与前端副标题显示一致）。
+# 带 "-H" 后缀表示「鸿蒙 UI 版」（harmony 主题随包内置，界面上可一键切换）。
+VERSION = "1.0.0.1-H"
 PRODUCT_NAME = "cuktech 10 ultra"
 COMPANY = "Histion"
 
@@ -83,9 +84,24 @@ def verify_inputs() -> None:
         raise SystemExit("缺少必需文件：" + "、".join(missing))
 
 
+def numeric_version(v: str) -> str:
+    """产品版本号 → Windows 版本资源要求的 4 段数字。
+
+    ``1.0.0.1-H`` → ``1, 0, 0, 1``（字母后缀只出现在字符串字段里，
+    fixed file info 那四段必须是纯数字，否则资源编译器会拒绝）。
+    """
+    nums = []
+    for part in str(v or "").split("."):
+        digits = "".join(ch for ch in part if ch.isdigit())
+        nums.append(int(digits) if digits else 0)
+    while len(nums) < 4:
+        nums.append(0)
+    return ", ".join(str(n) for n in nums[:4])
+
+
 def write_version_file() -> None:
     """写 PyInstaller VSVersionInfo（在追加归档前写入 bootloader，故 rcedit 无需再动）。"""
-    seg = "1, 0, 0, 0"
+    seg = numeric_version(VERSION)
     content = """# UTF-8
 VSVersionInfo(
   ffi=FixedFileInfo(

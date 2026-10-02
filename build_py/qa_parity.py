@@ -139,15 +139,18 @@ def part_a(tmp_home: Path) -> dict:
     check("A /api/state.app = name/version/vendor",
           set(st["app"]) == {"name", "version", "vendor"}, str(st["app"]))
     check("A /api/state.config 字段正确",
-          set(st["config"]) == {"address", "interval", "tray", "trayMode", "autoA"}, str(st["config"]))
+          set(st["config"]) == {"address", "interval", "tray", "trayMode", "autoA", "uiTheme"},
+          str(st["config"]))
     check("A /api/state.env 字段正确",
           set(st["env"]) == {"python", "pythonFound", "tokenPresent", "appDir", "platform"}, str(st["env"]))
     check("A /api/state.energy 字段正确",
           set(st["energy"]) == {"todayWh", "totalWh", "tracking", "current"}, str(st["energy"]))
     check("A /api/state.login 字段正确",
           set(st["login"]) == {"running", "kind", "result"}, str(st["login"]))
-    check("A /api/state.version=1.3.0 / app.version=1.0.0",
-          st["version"] == "1.3.0" and st["app"]["version"] == "1.0.0")
+    # 产品版本以 pyapp.PRODUCT 为唯一真源，避免改版本号时这里漏改
+    from pyapp import PRODUCT as _PRODUCT
+    check("A /api/state.version=1.3.0 / app.version=%s" % _PRODUCT["version"],
+          st["version"] == "1.3.0" and st["app"]["version"] == _PRODUCT["version"])
     check("A /api/state.env.pythonFound=True（解释器内置）", st["env"]["pythonFound"] is True)
     schemas["/api/state"] = _schema(st)
 

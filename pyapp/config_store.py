@@ -22,10 +22,16 @@ DEFAULTS: dict = {
     "tray": True,
     "trayMode": "total",
     "autoA": False,
+    # 界面风格：classic = 原深色科技风（默认），harmony = 鸿蒙 UI（HarmonyOS Design）。
+    # 纯前端换肤，桌面版与安卓版共用同一份 web/index.html，因此这个开关两端行为一致。
+    "uiTheme": "classic",
 }
 
 # 托盘显示模式的合法取值（与 ``server.js`` 一致）。
 TRAY_MODES = ("total", "all", "panel")
+
+# 界面风格合法取值（见 DEFAULTS.uiTheme）。
+UI_THEMES = ("classic", "harmony")
 
 
 class ConfigStore:
@@ -104,6 +110,9 @@ class ConfigStore:
         if out.get("trayMode") not in TRAY_MODES:
             out["trayMode"] = "total"
 
+        if out.get("uiTheme") not in UI_THEMES:
+            out["uiTheme"] = DEFAULTS["uiTheme"]
+
         out["autoA"] = out.get("autoA") is True
         out["tray"] = out.get("tray") is not False
 
@@ -118,4 +127,4 @@ class ConfigStore:
             return dict(self.data)
 
 
-__all__ = ["ConfigStore", "DEFAULTS", "TRAY_MODES"]
+__all__ = ["ConfigStore", "DEFAULTS", "TRAY_MODES", "UI_THEMES"]

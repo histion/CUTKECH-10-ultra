@@ -161,6 +161,8 @@ class App:
                 "tray": cfg.get("tray") is not False,
                 "trayMode": mode,
                 "autoA": cfg.get("autoA") is True,
+                # 界面风格（classic / harmony）——前端首次拿到状态时同步一次
+                "uiTheme": cfg.get("uiTheme") or "classic",
             },
             "env": {
                 "python": str(paths.exe_path()),
@@ -276,6 +278,12 @@ class App:
                     label = ("一行面板（四口+总）" if j["trayMode"] == "panel"
                              else ("图标轮流显示" if j["trayMode"] == "all" else "仅总功率"))
                     self.push_log("任务栏显示模式：" + label)
+
+            if j.get("uiTheme") in ("classic", "harmony"):
+                # 纯外观开关：只落盘，不重启采集器（重启会白白断一次蓝牙）
+                if j["uiTheme"] != cfg.get("uiTheme"):
+                    cfg["uiTheme"] = j["uiTheme"]
+                    self.push_log("界面风格：" + ("鸿蒙 UI" if j["uiTheme"] == "harmony" else "经典"))
 
             auto_changed = False
             if isinstance(j.get("autoA"), bool) and j["autoA"] != cfg.get("autoA"):

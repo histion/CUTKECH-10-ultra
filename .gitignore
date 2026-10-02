@@ -7,6 +7,10 @@ build_py/.venv/
 build_py/_work/
 build_py/_version_info.txt
 
+# 安卓端：中间产物与签名密钥不入库（APK 本身是交付物，保留）
+安卓/build/
+安卓/cuktech.jks
+
 # Python 缓存
 __pycache__/
 *.pyc

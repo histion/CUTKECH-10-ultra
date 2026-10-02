@@ -25,7 +25,8 @@ VERSION = "1.3.0"
 # 产品信息默认值，与 exe 版本资源、界面显示保持一致（build 脚本亦读同一套字面量）。
 PRODUCT = {
     "name": "cuktech 10 ultra",
-    "version": "1.0.0",
+    # 带 "-H" 后缀 = 内置鸿蒙 UI（HarmonyOS Design）主题、界面上可一键切换的版本
+    "version": "1.0.0.1-H",
     "vendor": "Histion",
     "id": "cuktech10ultra",
 }
