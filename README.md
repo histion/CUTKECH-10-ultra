@@ -1,4 +1,4 @@
-# 酷态科10号Ultra 监视器
+# 酷态科10号Ultra 监视器【大肥鱼蹬的AI代码】
 <img width="1121" height="1191" alt="a784ab9b-6d86-4083-8e78-126ba0d0653f" src="https://github.com/user-attachments/assets/6f168f09-4df4-4c87-a050-d213a61b26bb" />
 
 通过蓝牙（小米 MiOT 协议）连接酷态科 10 号 Ultra（型号 AD1204U）充电头，在电脑上监视四个口的  
